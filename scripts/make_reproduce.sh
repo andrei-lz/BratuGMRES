@@ -5,6 +5,8 @@ mkdir -p build data
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 
+export BRATU_LOG=info
+
 # Strong scaling example (adjust mpirun to your launcher/env)
 for p in 6 4 2 1; do
   mpirun -np $p ./build/bratu2d --N 1024 --lambda 3.0 --rtol 1e-8 --gmres_restart 100 --max_newton 30 --output_prefix data/strong_N1024_P${p}

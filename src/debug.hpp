@@ -14,18 +14,17 @@
 #include <version>
 
 // ---------- formatting (C++20 std::format if available) ----------
-#include <version>
 #if defined(__cpp_lib_format) && __cpp_lib_format >= 201907L
   #include <format>
   template <class... Args>
   static inline std::string _fmt(std::string_view f, Args&&... args) {
-    return std::vformat(f, std::make_format_args(std::forward<Args>(args)...));
+    return std::vformat(f, std::make_format_args(args...));
   }
 #elif __has_include(<fmt/format.h>)
   #include <fmt/format.h>
   template <class... Args>
   static inline std::string _fmt(std::string_view f, Args&&... args) {
-    return fmt::vformat(f, fmt::make_format_args(std::forward<Args>(args)...));
+    return fmt::vformat(f, fmt::make_format_args(args...));
   }
 #else
   template <class... Args>
