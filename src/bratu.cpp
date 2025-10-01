@@ -77,7 +77,7 @@ void apply_Jacobi(const Grid &g, const std::vector<double> &r,
     z.resize(r.size());
 
 #pragma omp parallel for
-  for (size_t k = 0; k < r.size(); ++k)
+  for (long k = 0; k < r.size(); ++k)
   {
     z[k] = r[k] / g.diagJ[k];
   }

@@ -10,8 +10,9 @@
 #include "mpi.h"
 #include <limits>
 
+#ifndef INT_MAX
 #define INT_MAX std::numeric_limits<int>::max();
-
+#endif
 // ---------- formatting (C++20 std::format if available) ----------
 #if defined(__cpp_lib_format) && __cpp_lib_format >= 201907L
   #include <format>

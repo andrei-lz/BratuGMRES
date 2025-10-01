@@ -1,14 +1,13 @@
 #include "linalg.hpp"
 #include <cmath>
 #include <omp.h>
-#include <type_traits>
 
 double dot(const Grid &g, const std::vector<double> &a,
            const std::vector<double> &b)
 {
   const int nxh = g.nx + 2;
   double s = 0.0;
-#pragma omp parallel for reduction(+ : s) collapse(2)
+#pragma omp parallel for reduction(+ : s) collapse(2) schedule(static)
   for (int j = 1; j <= g.ny; ++j)
   {
     for (int i = 1; i <= g.nx; ++i)
