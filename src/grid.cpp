@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include "debug.hpp"
+#include "timing.hpp"
 
 static inline int NX(const Grid &g) { return g.nx + 2; }
 static inline int NY(const Grid &g) { return g.ny + 2; }
@@ -77,10 +78,16 @@ Grid make_local_grid(const Cart2D &cart, int N_global)
   return g;
 }
 
+static double g_comm_time_accum = 0.0;
+
+double grid_comm_time_get()   { return g_comm_time_accum; }
+void   grid_comm_time_reset() { g_comm_time_accum = 0.0; }
+
 // Nonblocking exchange of 1-cell halos in N,S,E,W using derived types for
 // columns.
 void exchange_halos(const Cart2D &cart, const Grid &g, std::vector<double> &vec)
 {
+  Timer t; t.tic();
   ScopedPhase _p(cart.comm, "halo", "exchange_halos", /*it*/0);
 
   const int nxh = g.nx + 2;
@@ -158,4 +165,5 @@ void exchange_halos(const Cart2D &cart, const Grid &g, std::vector<double> &vec)
   }
 
   MPI_Type_free(&col_type);
+  g_comm_time_accum += t.toc();
 }

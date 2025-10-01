@@ -3,8 +3,6 @@
 #include "linalg.hpp"
 #include "timing.hpp"
 #include <cmath>
-#include <cstdio>
-#include <iostream>
 #include <mpi.h>
 #include <vector>
 
@@ -24,18 +22,28 @@ NewtonStats newton_solve(const Cart2D &cart, Grid &g, const Options &opt)
   const int n = (int)g.u.size();
   std::vector<double> rhs(n, 0.0), delta(n, 0.0);
 
+  // For measurements
+  double res0 = -1.0;
+  double atol = 0.0; 
+
   for (int it = 0; it < opt.max_newton; ++it)
   {
     // F(u)
     apply_F(cart, g, opt.lambda);
     double resnorm = global_norm2(cart.comm, it, g, g.F);
-    if (cart.rank == 0)
-      std::cout << "Newton " << it << " residual " << resnorm << "\n";
-    if (resnorm < opt.rtol)
-    {
-      st.converged = true;
-      st.newton_iters = it;
-      st.final_res = resnorm;
+    if (res0 < 0.0) res0 = std::max(resnorm, 1e-30);
+    double rel = resnorm / res0;
+    LOGI("newton", it, "||F|| = {:.6e}  (rel={:.6e})", resnorm, rel);
+
+    // Stopping: abs OR relative (robust)
+    bool abs_ok = (resnorm <= atol);
+    bool rel_ok = (resnorm <= opt.rtol * res0);
+    if (abs_ok || rel_ok) {
+      st.converged   = true;
+      st.newton_iters= it;
+      st.final_res   = resnorm;
+      LOGI("newton", it, "CONVERGED abs_ok={} rel_ok={}  final ||F||={:.6e}",
+           abs_ok, rel_ok, resnorm);                                     // >>> log
       return st;
     }
 
@@ -53,26 +61,36 @@ NewtonStats newton_solve(const Cart2D &cart, Grid &g, const Options &opt)
 
     // Solve J δ = -F with GMRES
     delta.assign(n, 0.0);
-    (void)gmres_solve(cart.comm, it, n, opt.gmres_restart, opt.max_gmres_it,
-                      1e-3, Av, MInv, rhs, delta, g, nullptr);
+
+    // Inexact-Newton coupling: inner tol follows outer progress (cap between 1e-8 and 1e-2*rel)
+    double linrtol = std::min(1e-8, std::max(1e-2 * rel, 1e-6));
+
+    GMRESStats gst = gmres_solve(cart.comm, it, n,
+                                 opt.gmres_restart, opt.max_gmres_it,
+                                 linrtol, Av, MInv, rhs, delta, g, nullptr);
+    LOGI("gmres", it, "iters={} relres={:.3e} target={:.1e} conv={}",
+         gst.iters, gst.relres, linrtol, (int)gst.converged);
 
     // Line search (Armijo)
     double alpha = 1.0;
     const double c1 = opt.ls_c1, beta = opt.ls_beta;
     std::vector<double> u_save = g.u;
 
+    int ls_tries = 0;
     for (int ls = 0; ls < 20; ++ls)
     {
-      // u_trial = u + alpha*delta
       g.u = u_save;
       axpby(alpha, delta, 1.0, g.u);
       apply_F(cart, g, opt.lambda);
       double ftrial = global_norm2(cart.comm, it, g, g.F);
-      double ftrial_sq = ftrial * ftrial;
-      double resnorm_sq = resnorm * resnorm;
-      if (ftrial_sq <= resnorm_sq * (1.0 - 2.0 * c1 * alpha)) { break; } // sufficient decrease
+      if (ftrial * ftrial <= resnorm * resnorm * (1.0 - 2.0 * c1 * alpha)) {
+        LOGI("linesearch", it, "accept alpha={:.3f} ftrial={:.3e}", alpha, ftrial); // >>>
+        break;
+      }
       alpha *= beta;
+      ++ls_tries;
     }
+    if (ls_tries > 0) LOGI("linesearch", it, "backtracks={}", ls_tries);           // >>>
     st.newton_iters = it + 1;
   }
 

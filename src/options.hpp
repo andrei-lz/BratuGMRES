@@ -8,8 +8,8 @@ struct Options
   double rtol = 1e-8;
   int gmres_restart = 50;
   int max_newton = 30;
-  int max_gmres_it = 400;
-  int omp_threads = 8;
+  int max_gmres_it = 4000;
+  int omp_threads = 6;
   double ls_c1 = 1e-4;
   double ls_beta = 0.5;
   std::string output_prefix = "data/run";

@@ -121,5 +121,7 @@ GMRESStats gmres_solve(MPI_Comm comm, int iter_id, int n, int restart,
   // Guards against division by 0
   const double denom = (bnorm > 0.0 ? bnorm : 1.0);
   st.relres = rnorm / denom;
+  LOGI("gmres", iter_id, "exit iters={} relres={:.3e} converged={}",
+     st.iters, st.relres, (int)st.converged);
   return st;
 }
