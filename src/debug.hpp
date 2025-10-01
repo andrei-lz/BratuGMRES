@@ -11,22 +11,29 @@
 #include <string>      // for std::string
 #include <algorithm>   // for std::max
 #include <climits>     // for INT_MAX
+#include <version>
 
 // ---------- formatting (C++20 std::format if available) ----------
+#include <version>
 #if defined(__cpp_lib_format) && __cpp_lib_format >= 201907L
   #include <format>
   template <class... Args>
   static inline std::string _fmt(std::string_view f, Args&&... args) {
     return std::vformat(f, std::make_format_args(std::forward<Args>(args)...));
   }
+#elif __has_include(<fmt/format.h>)
+  #include <fmt/format.h>
+  template <class... Args>
+  static inline std::string _fmt(std::string_view f, Args&&... args) {
+    return fmt::vformat(f, fmt::make_format_args(std::forward<Args>(args)...));
+  }
 #else
-  // Fallback: very small %s-only shim to avoid pulling extra deps.
-  // Prefer keeping messages simple (pre-format to a std::string if needed).
   template <class... Args>
   static inline std::string _fmt(std::string_view f, Args&&...) {
     return std::string(f);
   }
 #endif
+
 
 // ---------- rank helper (keep it here so callers don't duplicate) ----------
 static inline int rank_of(MPI_Comm c) { int r=0; MPI_Comm_rank(c,&r); return r; }
