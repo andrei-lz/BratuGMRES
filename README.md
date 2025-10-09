@@ -2,7 +2,7 @@
 
 [![Code](https://img.shields.io/badge/Code-github.com%2Fandrei--lz%2FBratuGMRES-blue)](https://github.com/andrei-lz/BratuGMRES)
 
-I put together this parallel solver for the 2D Bratu problem—it's a classic nonlinear PDE that mixes diffusion with a stiff exponential reaction term. Think of it as modeling heat in a plate where things can get wild, like thermal runaway. I wanted a scalable way to tackle this, so I went with a Newton-Krylov approach using matrix-free GMRES, all on a domain-decomposed grid with MPI and OpenMP. It's a great benchmark for nonlinear solvers, and I've got it running efficiently on multi-core setups. Check out the code, play with it, and see how it scales!
+I put together this parallel solver for the 2D Bratu problem. It's a classic nonlinear PDE that mixes diffusion with a stiff exponential reaction term. Think of it as modeling generated heat in a thin metal plate with phenomenons like thermal runaway. I wanted a scalable way to tackle this, so I went with a Newton-Krylov approach using matrix-free GMRES, all on a domain-decomposed grid with MPI and OpenMP. It's a great benchmark for nonlinear solvers, and I've got it running reasonably efficiently on multi-core setups.
 
 ## Description
 
