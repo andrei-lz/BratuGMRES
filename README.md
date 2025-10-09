@@ -42,7 +42,7 @@ This dumps VTK files like `data/solution_iter_*.vtu`. Open them in ParaView to s
 
 For scaling sweeps, use the provided `reproduce.sh` script (tweak mpirun if needed):
 ```bash
-./reproduce.sh
+scripts/make_reproduce.sh
 ```
 It runs strong/weak tests and logs CSVs in `data/`.
 
@@ -65,11 +65,8 @@ MPI_Waitall(8, reqs, MPI_STATUSES_IGNORE);
 ```
 The five-point stencil is cache-friendly and second-order accuracy trades off higher-order complexity for speed.
 
-![Five-point stencil](https://via.placeholder.com/300x200?text=Five-Point+Stencil)  
-*(Center interacts with N, S, E, W neighbors—halos make boundaries a breeze.)*
-
-For the big picture:
-![Architecture Diagram](https://via.placeholder.com/600x400?text=Solver+Architecture)  
+For the big picture:  
+<img width="3840" height="2767" alt="bratudiagram" src="https://github.com/user-attachments/assets/ad3c59c4-b207-48a8-8cd5-23b8ec3e8bb1" />
 *(Grid feeds data to Newton/GMRES; lin alg kernels power the math.)*
 
 This separation lets you swap solvers without touching the grid implementation.
