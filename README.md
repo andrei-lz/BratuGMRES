@@ -6,11 +6,11 @@ I put together this parallel solver for the 2D Bratu problem. It's a classic non
 
 ## Description
 
-The Bratu equation is ![Bratu Equation](https://latex.codecogs.com/png.latex?F(u)%20=%20-%5CDelta%20u%20-%20%5Clambda%20e%5Eu%20=%200) on a unit square with zero Dirichlet boundaries. For small λ, solutions are smooth; crank it up, and you get multiple solutions or steep profiles—perfect for testing stiff numerics.
+The Bratu equation is ![Bratu Equation](https://latex.codecogs.com/png.latex?F(u)%20=%20-%5CDelta%20u%20-%20%5Clambda%20e%5Eu%20=%200) on a unit square with zero Dirichlet boundaries. For small λ, solutions are smooth but as it increases, you start getting multiple solutions or steep profiles which are perfect for testing numerical solvers on.
 
-I discretize it on a uniform Cartesian grid using a five-point stencil for the Laplacian. Newton's method handles the nonlinearity, while GMRES solves the linear steps without building the full Jacobian (just matrix-vector products). Everything's parallelized: MPI splits the domain, halo exchanges keep boundaries in sync, and OpenMP speeds up local ops like dots and norms.
+I discretize it on a uniform Cartesian grid using a five-point stencil for the Laplacian. Newton's method handles the nonlinearity, while GMRES solves the linear steps without building the full Jacobian (just matrix-vector products). Everything's parallelized: MPI splits the domain, halo exchanges keep boundaries in sync, and OpenMP speeds up local operations like dots and norms.
 
-This project's about keeping things modular and intuitive—grid management separate from solvers, clean comms, and measured scaling from real runs.
+This project's about keeping things modular and intuitive grid management separate from solvers, clean communications, and measured scaling from real runs.
 
 ## Features
 
